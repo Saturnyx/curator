@@ -5,6 +5,7 @@ use serde::Deserialize;
 use std::process;
 
 use crate::config::{ConfigManager, CONFIGURATION};
+use crate::tools::Tools;
 
 #[derive(Deserialize)]
 struct TreeItem {
@@ -77,8 +78,18 @@ impl LicenseManager {
                     println!(
                         "{} License '{}' not found in SPDX list. Please try again.",
                         "[ERROR]".red(),
-                        input_license.red()
+                        input_license.clone().red()
                     );
+                    
+                    // Show top 3 similar licenses using fuzzy search
+                    let similar_licenses = Tools::fuzzy_search(&all_licenses, &input_license);
+                    if !similar_licenses.is_empty() {
+                        println!("{}", "Did you mean:".yellow());
+                        for (i, (license, _score)) in similar_licenses.iter().enumerate() {
+                            let clean_license = license.trim_end_matches(".txt");
+                            println!("  {}. {}", i + 1, clean_license.cyan());
+                        }
+                    }
                 }
             }
             selected_license

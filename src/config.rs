@@ -12,6 +12,7 @@ use std::process;
 use std::sync::Mutex;
 
 use crate::license::LicenseManager;
+use crate::tools::Tools;
 
 pub static CONFIGURATION: Lazy<Mutex<HashMap<String, HashMap<String, String>>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
@@ -24,7 +25,8 @@ impl ConfigManager {
         if Path::new("curator.json").exists() {
             println!("Found curator.json file");
             let config = Self::get_config();
-            let mut guard: std::sync::MutexGuard<'_, HashMap<String, HashMap<String, String>>> = CONFIGURATION.lock().unwrap();
+            let mut guard: std::sync::MutexGuard<'_, HashMap<String, HashMap<String, String>>> =
+                CONFIGURATION.lock().unwrap();
             *guard = config;
         } else {
             println!("{}", "Looks like your project isn't configured...".yellow());
@@ -129,8 +131,16 @@ impl ConfigManager {
                 println!(
                     "{} License '{}' not found in SPDX list. Please try again.",
                     "[ERROR]".red(),
-                    input_license.red()
+                    input_license.clone().red()
                 );
+                let similar_licenses = Tools::fuzzy_search(&licenses, &input_license);
+                if !similar_licenses.is_empty() {
+                    println!("{}", "Did you mean:".yellow());
+                    for (i, (license, _score)) in similar_licenses.iter().enumerate() {
+                        let clean_license = license.trim_end_matches(".txt");
+                        println!("  {}. {}", i + 1, clean_license.cyan());
+                    }
+                }
             }
         }
         let year = Local::now().year();
