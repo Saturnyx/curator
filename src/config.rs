@@ -2,15 +2,19 @@ use chrono::Datelike;
 use chrono::Local;
 use crossterm::style::Stylize;
 use dialoguer::Input;
+use once_cell::sync::Lazy;
 use serde_json;
 use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::path::Path;
 use std::process;
+use std::sync::Mutex;
 
 use crate::license::LicenseManager;
-use crate::CONFIGURATION;
+
+pub static CONFIGURATION: Lazy<Mutex<HashMap<String, HashMap<String, String>>>> =
+    Lazy::new(|| Mutex::new(HashMap::new()));
 
 pub struct ConfigManager;
 

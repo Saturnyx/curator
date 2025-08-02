@@ -4,8 +4,7 @@ use reqwest::blocking::Client;
 use serde::Deserialize;
 use std::process;
 
-use crate::config::ConfigManager;
-use crate::CONFIGURATION;
+use crate::config::{ConfigManager, CONFIGURATION};
 
 #[derive(Deserialize)]
 struct TreeItem {
