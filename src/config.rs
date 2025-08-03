@@ -40,55 +40,7 @@ impl ConfigManager {
             process::exit(1);
         }
     }
-
-    /// Asks and creates `curator.json`
-    pub fn init_config() {
-        let config = Self::ask_config();
-        {
-            let mut guard = CONFIGURATION.lock().unwrap();
-            *guard = config;
-        }
-        Self::save_config();
-        println!("{} curator.json created", "[SUCCESS]".green());
-        println!("{}", "Completed Project Initialization".bold());
-        let add_to_gitignore: bool = Input::<String>::new()
-            .with_prompt("Do you want to add curator.json to .gitignore? (y/n)")
-            .default("y".into())
-            .interact_text()
-            .unwrap()
-            .to_lowercase()
-            .starts_with('y');
-        Self::gitignored(add_to_gitignore);
-        Self::save_config();
-    }
-
-    /// Returns hashmap from `curator.json`
-    fn get_config() -> HashMap<String, HashMap<String, String>> {
-        let content = match fs::read_to_string("curator.json") {
-            Ok(c) => c,
-            Err(e) => {
-                println!(
-                    "{} Failed to read curator.json file: {}",
-                    "[ERROR]".red(),
-                    e
-                );
-                process::exit(1);
-            }
-        };
-        let map = match serde_json::from_str(&content) {
-            Ok(c) => c,
-            Err(e) => {
-                println!(
-                    "{} Failed to parse curator.json file: {}",
-                    "[ERROR]".red(),
-                    e
-                );
-                process::exit(1);
-            }
-        };
-        map
-    }
-
+    
     /// Checks if the config is correct
     pub fn check_config() -> bool {
         if !Path::new("curator.json").exists() {
@@ -164,6 +116,54 @@ impl ConfigManager {
                 process::exit(1);
             }
         }
+    }
+
+    /// Asks and creates `curator.json`
+    pub fn init_config() {
+        let config = Self::ask_config();
+        {
+            let mut guard = CONFIGURATION.lock().unwrap();
+            *guard = config;
+        }
+        Self::save_config();
+        println!("{} curator.json created", "[SUCCESS]".green());
+        println!("{}", "Completed Project Initialization".bold());
+        let add_to_gitignore: bool = Input::<String>::new()
+            .with_prompt("Do you want to add curator.json to .gitignore? (y/n)")
+            .default("y".into())
+            .interact_text()
+            .unwrap()
+            .to_lowercase()
+            .starts_with('y');
+        Self::gitignored(add_to_gitignore);
+        Self::save_config();
+    }
+
+    /// Returns hashmap from `curator.json`
+    fn get_config() -> HashMap<String, HashMap<String, String>> {
+        let content = match fs::read_to_string("curator.json") {
+            Ok(c) => c,
+            Err(e) => {
+                println!(
+                    "{} Failed to read curator.json file: {}",
+                    "[ERROR]".red(),
+                    e
+                );
+                process::exit(1);
+            }
+        };
+        let map = match serde_json::from_str(&content) {
+            Ok(c) => c,
+            Err(e) => {
+                println!(
+                    "{} Failed to parse curator.json file: {}",
+                    "[ERROR]".red(),
+                    e
+                );
+                process::exit(1);
+            }
+        };
+        map
     }
 
     /// Records repository information from user through prompts
