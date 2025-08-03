@@ -3,6 +3,10 @@ name = "curator"
 version = "0.2.2"
 edition = "2021"
 
+[[bin]]
+name = "cu"
+path = "src/main.rs"
+
 [dependencies]
 once_cell = "1.18"
 crossterm = "0.29.0"
