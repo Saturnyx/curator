@@ -6,7 +6,7 @@ pub struct Tools;
 impl Tools {
     pub fn fuzzy_search<'a>(licenses: &'a [String], query: &str) -> Vec<(&'a str, i64)> {
         let matcher = SkimMatcherV2::default();
-        let mut matches = Vec::new();
+        let mut matches = Vec::with_capacity(std::cmp::min(licenses.len(), 10)); // Pre-allocate
 
         for license in licenses {
             if let Some(score) = matcher.fuzzy_match(license, query) {
@@ -14,10 +14,14 @@ impl Tools {
             }
         }
 
-        // Sort by score (higher is better)
-        matches.sort_by(|a, b| b.1.cmp(&a.1));
+        if matches.len() > 3 {
+            matches.select_nth_unstable_by(2, |a, b| b.1.cmp(&a.1));
+            matches.truncate(3);
+            matches.sort_unstable_by(|a, b| b.1.cmp(&a.1));
+        } else {
+            matches.sort_unstable_by(|a, b| b.1.cmp(&a.1));
+        }
 
-        // Return only top 3 matches
-        matches.into_iter().take(3).collect()
+        matches
     }
 }

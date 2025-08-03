@@ -22,31 +22,44 @@ pub struct ConfigManager;
 impl ConfigManager {
     /// Loads configuration
     pub fn load_config() {
-        if Path::new("curator.json").exists() {
-            println!("Found curator.json file");
+        if Self::check_config() {
             let config = Self::get_config();
             let mut guard: std::sync::MutexGuard<'_, HashMap<String, HashMap<String, String>>> =
                 CONFIGURATION.lock().unwrap();
             *guard = config;
         } else {
-            println!("{}", "Looks like your project isn't configured...".yellow());
-            let config = Self::ask_config();
-            {
-                let mut guard = CONFIGURATION.lock().unwrap();
-                *guard = config;
-            }
-            Self::save_config();
-            println!("{} curator.json created", "[SUCCESS]".green());
-            println!("{}", "Completed Project Initialization".bold());
-            let add_to_gitignore: bool = Input::<String>::new()
-                .with_prompt("Do you want to add curator.json to .gitignore? (y/n)")
-                .default("y".into())
-                .interact_text()
-                .unwrap()
-                .to_lowercase()
-                .starts_with('y');
-            Self::gitignored(add_to_gitignore);
+            println!(
+                "{} Project configuration not found or has been misconfigured",
+                "[ERROR]".red()
+            );
+            println!(
+                "{} Run `{}` to reconfigure project",
+                "[FIX]".green(),
+                "cu config set".grey()
+            );
+            process::exit(1);
         }
+    }
+
+    /// Asks and creates `curator.json`
+    pub fn init_config() {
+        let config = Self::ask_config();
+        {
+            let mut guard = CONFIGURATION.lock().unwrap();
+            *guard = config;
+        }
+        Self::save_config();
+        println!("{} curator.json created", "[SUCCESS]".green());
+        println!("{}", "Completed Project Initialization".bold());
+        let add_to_gitignore: bool = Input::<String>::new()
+            .with_prompt("Do you want to add curator.json to .gitignore? (y/n)")
+            .default("y".into())
+            .interact_text()
+            .unwrap()
+            .to_lowercase()
+            .starts_with('y');
+        Self::gitignored(add_to_gitignore);
+        Self::save_config();
     }
 
     /// Returns hashmap from `curator.json`
@@ -76,7 +89,64 @@ impl ConfigManager {
         map
     }
 
-    /// Saves config to curator.json from CONFIGURATION
+    /// Checks if the config is correct
+    pub fn check_config() -> bool {
+        if !Path::new("curator.json").exists() {
+            return false;
+        };
+        let content = match fs::read_to_string("curator.json") {
+            Ok(c) => c,
+            Err(_) => {
+                return false;
+            }
+        };
+        let content_map = match serde_json::from_str::<HashMap<String, HashMap<String, String>>>(
+            &content.as_str(),
+        ) {
+            Ok(c) => c,
+            Err(_) => {
+                return false;
+            }
+        };
+        let settings = match content_map.get("settings") {
+            Some(c) => c,
+            None => {
+                return false;
+            }
+        };
+        let path = match settings.get("path") {
+            Some(c) => c,
+            None => {
+                return false;
+            }
+        };
+        if path != &env::current_dir().unwrap().to_string_lossy() {
+            return false;
+        }
+        let project = match settings.get("project") {
+            Some(c) => c,
+            None => {
+                return false;
+            }
+        };
+        if project
+            != &env::current_dir()
+                .unwrap()
+                .file_name()
+                .unwrap()
+                .to_string_lossy()
+        {
+            return false;
+        }
+        match settings.get("author") {
+            Some(_) => return true,
+            None => {
+                return false;
+            }
+        }
+    }
+
+    /// Saves config to `curator.json` from CONFIGURATION
     pub fn save_config() {
         let config_guard = CONFIGURATION.lock().unwrap();
         match serde_json::to_string_pretty(&*config_guard) {
@@ -159,6 +229,7 @@ impl ConfigManager {
         map
     }
 
+    // Adds `curator.json` to `.gitignore`
     fn gitignored(in_gitignore: bool) {
         let gitignore_path = Path::new(".gitignore");
         let filename = "curator.json";
