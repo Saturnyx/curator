@@ -98,9 +98,6 @@ jobs:
             curator-macos-amd64/curator-macos-amd64
             curator-macos-arm64/curator-macos-arm64
           body: |
-            ## Changes
-            - Automated release for ${{ github.ref_name }}
-
             ## Installation
             Download the appropriate binary for your platform and add it to your PATH.
           draft: false

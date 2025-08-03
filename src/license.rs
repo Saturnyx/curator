@@ -149,6 +149,21 @@ impl LicenseManager {
         }
     }
 
+    /// lists all available licenses
+    pub fn list_licenses() {
+        println!("{}", "License List".bold());
+        let license_list = match Self::get_licenses() {
+            Ok(c) => c,
+            Err(e) => {
+                println!("{} Could not get license list: {}", "[ERROR]".red(), e);
+                process::exit(1);
+            }
+        };
+        for license in license_list {
+            println!("{}", license.trim_end_matches(".txt"));
+        }
+    }
+
     /// Returns a vector of license strings
     pub fn get_licenses() -> Result<Vec<String>, Box<dyn std::error::Error>> {
         {

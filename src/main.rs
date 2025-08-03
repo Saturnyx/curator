@@ -35,6 +35,8 @@ enum LicenseAction {
     Remove,
     /// Reload the current license
     Reload,
+    /// List all licenses
+    List,
 }
 
 #[derive(Subcommand, Clone)]
@@ -55,6 +57,9 @@ fn main() {
             }
             LicenseAction::Reload => {
                 LicenseManager::reload_license();
+            }
+            LicenseAction::List => {
+                LicenseManager::list_licenses();
             }
         },
         Commands::Config { action } => match action {
