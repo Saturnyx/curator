@@ -46,6 +46,7 @@ cu config set
 ```
 
 This will prompt you for:
+
 - Your legal name (for copyright notices)
 - Preferred license type
 - Whether to add `curator.json` to `.gitignore`
