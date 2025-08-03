@@ -37,6 +37,11 @@ enum LicenseAction {
     Reload,
     /// List all licenses
     List,
+    /// Preview a license
+    Preview {
+        /// The name of the license to download and configure
+        license_name: String,
+    },
 }
 
 #[derive(Subcommand, Clone)]
@@ -60,6 +65,9 @@ fn main() {
             }
             LicenseAction::List => {
                 LicenseManager::list_licenses();
+            }
+            LicenseAction::Preview { license_name } => {
+                LicenseManager::preview_license(license_name);
             }
         },
         Commands::Config { action } => match action {

@@ -149,7 +149,7 @@ impl LicenseManager {
         }
     }
 
-    /// lists all available licenses
+    /// Lists all available licenses
     pub fn list_licenses() {
         println!("{}", "License List".bold());
         let license_list = match Self::get_licenses() {
@@ -161,6 +161,81 @@ impl LicenseManager {
         };
         for license in license_list {
             println!("{}", license.trim_end_matches(".txt"));
+        }
+    }
+
+    /// Preview selected license
+    pub fn preview_license(mut license: String) {
+        license = license.to_lowercase();
+        let license_list = match Self::get_licenses() {
+            Ok(files) => {
+                println!("{} Fetched Licenses", "[SUCCESS]".green());
+                files
+            }
+            Err(e) => {
+                eprintln!("{} Could not fetch licenses: {}", "[ERROR]".red(), e);
+                process::exit(1);
+            }
+        };
+
+        let license_list_lower: Vec<String> =
+            license_list.iter().map(|l| l.to_lowercase()).collect();
+
+        let search_name = format!("{license}.txt");
+        if let Some(idx) = license_list_lower.iter().position(|l| l == &search_name) {
+            let selected_license = license_list[idx].trim_end_matches(".txt").to_string();
+            println!(
+                "License '{}' found in SPDX list.",
+                selected_license.clone().green()
+            );
+            let url = format!(
+        "https://raw.githubusercontent.com/spdx/license-list-data/main/text/{selected_license}.txt"
+    );
+            let response = match HTTP_CLIENT.get(&url).send() {
+                Ok(resp) => resp,
+                Err(e) => {
+                    eprintln!("{} Failed to fetch license: {}", "[ERROR]".red(), e);
+                    process::exit(1);
+                }
+            };
+
+            if !response.status().is_success() {
+                println!(
+                    "Failed to download license '{}': HTTP {} - {}",
+                    license,
+                    response.status().as_u16(),
+                    response
+                        .status()
+                        .canonical_reason()
+                        .unwrap_or("Unknown error")
+                );
+                process::exit(1);
+            }
+
+            let response_text = match response.text() {
+                Ok(text) => text,
+                Err(e) => {
+                    eprintln!("{} Failed to read license text: {}", "[ERROR]".red(), e);
+                    process::exit(1);
+                }
+            };
+            println!("{}", "Preview -----".bold());
+            println!("{response_text}");
+            print!("{}", "End -----".bold())
+        } else {
+            println!(
+                "{} License '{}' not found in SPDX list. Please try again.",
+                "[ERROR]".red(),
+                license.clone().red()
+            );
+            let similar_licenses = Tools::fuzzy_search(&license_list_lower, &license);
+            if !similar_licenses.is_empty() {
+                println!("{}", "Did you mean:".yellow());
+                for (i, (license, _score)) in similar_licenses.iter().enumerate() {
+                    let clean_license = license.trim_end_matches(".txt");
+                    println!("  {}. {}", i + 1, clean_license.cyan());
+                }
+            }
         }
     }
 
