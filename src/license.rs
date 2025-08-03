@@ -6,7 +6,7 @@ use serde::Deserialize;
 use std::process;
 use std::sync::Mutex;
 
-use crate::config::{CONFIGURATION, ConfigManager};
+use crate::config::{ConfigManager, CONFIGURATION};
 use crate::tools::Tools;
 
 static LICENSE_CACHE: Lazy<Mutex<Option<Vec<String>>>> = Lazy::new(|| Mutex::new(None));
@@ -33,7 +33,6 @@ struct ApiResponse {
 pub struct LicenseManager;
 
 impl LicenseManager {
-    
     /// Searches for the license and saves to `LICENSE`
     pub fn set_license(mut license: String) {
         if !ConfigManager::check_config() {
@@ -66,7 +65,7 @@ impl LicenseManager {
             license_list.iter().map(|l| l.to_lowercase()).collect();
 
         let selected_license: String;
-        let search_name = format!("{}.txt", license);
+        let search_name = format!("{license}.txt");
         if let Some(idx) = license_list_lower.iter().position(|l| l == &search_name) {
             selected_license = license_list[idx].trim_end_matches(".txt").to_string();
             println!(
@@ -180,8 +179,7 @@ impl LicenseManager {
     /// Downloads License file to `LICENSE`
     fn download_license(license: String) -> Result<(), Box<dyn std::error::Error>> {
         let url = format!(
-            "https://raw.githubusercontent.com/spdx/license-list-data/main/text/{}.txt",
-            license
+            "https://raw.githubusercontent.com/spdx/license-list-data/main/text/{license}.txt"
         );
         let response = HTTP_CLIENT.get(&url).send()?;
 
@@ -200,11 +198,11 @@ impl LicenseManager {
 
         let mut response_text = response.text()?;
         response_text = Self::modify_license(response_text);
-        let filename = format!("LICENSE");
+        let filename = "LICENSE".to_string();
         std::fs::write(&filename, response_text)?;
         println!(
             "{}",
-            format!("Downloaded {} license to {}", license, filename).green()
+            format!("Downloaded {license} license to {filename}").green()
         );
         Ok(())
     }
@@ -233,7 +231,7 @@ impl LicenseManager {
                             val.clone()
                         } else {
                             let user_input: String = Input::new()
-                                .with_prompt(format!("{}", placeholder))
+                                .with_prompt(placeholder)
                                 .interact_text()
                                 .unwrap();
 
@@ -242,7 +240,7 @@ impl LicenseManager {
                         }
                     } else {
                         let user_input: String = Input::new()
-                            .with_prompt(format!("{}", placeholder))
+                            .with_prompt(placeholder)
                             .interact_text()
                             .unwrap();
                         replacements.insert(placeholder.to_string(), user_input.clone());
@@ -257,7 +255,7 @@ impl LicenseManager {
         }
 
         for (placeholder, value) in &replacements {
-            let pattern = format!("<{}>", placeholder);
+            let pattern = format!("<{placeholder}>");
             license = license.replace(&pattern, value);
         }
 
@@ -271,7 +269,7 @@ impl LicenseManager {
                     license.replace_range(start..=end, &placeholder);
                     pos = start + placeholder.len();
                 } else {
-                    break; 
+                    break;
                 }
             } else {
                 break;

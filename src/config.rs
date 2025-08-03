@@ -101,7 +101,7 @@ impl ConfigManager {
             }
         };
         let content_map = match serde_json::from_str::<HashMap<String, HashMap<String, String>>>(
-            &content.as_str(),
+            content.as_str(),
         ) {
             Ok(c) => c,
             Err(_) => {
@@ -138,12 +138,7 @@ impl ConfigManager {
         {
             return false;
         }
-        match settings.get("author") {
-            Some(_) => return true,
-            None => {
-                return false;
-            }
-        }
+        settings.get("author").is_some()
     }
 
     /// Saves config to `curator.json` from CONFIGURATION
@@ -193,7 +188,7 @@ impl ConfigManager {
                 .interact_text()
                 .unwrap();
             let input_license_lower = input_license.to_lowercase();
-            let search_name = format!("{}.txt", input_license_lower);
+            let search_name = format!("{input_license_lower}.txt");
             if let Some(idx) = licenses_lower.iter().position(|l| l == &search_name) {
                 project_license = licenses[idx].trim_end_matches(".txt").to_string();
                 break;
@@ -220,7 +215,7 @@ impl ConfigManager {
         let mut settings = HashMap::new();
         settings.insert("project".to_string(), project_name.into());
         settings.insert("path".to_string(), project_dir.to_string_lossy().into());
-        settings.insert("author".to_string(), author.into());
+        settings.insert("author".to_string(), author);
         let mut data = HashMap::new();
         data.insert("license".to_string(), project_license);
         data.insert("year".to_string(), year.to_string());
@@ -253,26 +248,24 @@ impl ConfigManager {
                     println!("{} Added '{}' to .gitignore", "[SUCCESS]".green(), filename);
                 }
             }
-        } else {
-            if gitignore_path.exists() {
-                let lines = fs::read_to_string(gitignore_path)
-                    .unwrap_or_default()
-                    .lines()
-                    .map(|l| l.trim().to_string())
-                    .filter(|l| l != filename && !l.is_empty())
-                    .collect::<Vec<_>>();
-                if let Err(e) = fs::write(
-                    gitignore_path,
-                    lines.join("\n") + if lines.is_empty() { "" } else { "\n" },
-                ) {
-                    eprintln!("{} Failed to update .gitignore: {}", "[ERROR]".red(), e);
-                } else {
-                    println!(
-                        "{} Removed '{}' from .gitignore",
-                        "[SUCCESS]".green(),
-                        filename
-                    );
-                }
+        } else if gitignore_path.exists() {
+            let lines = fs::read_to_string(gitignore_path)
+                .unwrap_or_default()
+                .lines()
+                .map(|l| l.trim().to_string())
+                .filter(|l| l != filename && !l.is_empty())
+                .collect::<Vec<_>>();
+            if let Err(e) = fs::write(
+                gitignore_path,
+                lines.join("\n") + if lines.is_empty() { "" } else { "\n" },
+            ) {
+                eprintln!("{} Failed to update .gitignore: {}", "[ERROR]".red(), e);
+            } else {
+                println!(
+                    "{} Removed '{}' from .gitignore",
+                    "[SUCCESS]".green(),
+                    filename
+                );
             }
         }
     }
