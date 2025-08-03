@@ -1,11 +1,15 @@
 use crossterm::style::Stylize;
 use dialoguer::Input;
+use once_cell::sync::Lazy;
 use reqwest::blocking::Client;
 use serde::Deserialize;
 use std::process;
+use std::sync::Mutex;
 
 use crate::config::{ConfigManager, CONFIGURATION};
 use crate::tools::Tools;
+
+static LICENSE_CACHE: Lazy<Mutex<Option<Vec<String>>>> = Lazy::new(|| Mutex::new(None));
 
 #[derive(Deserialize)]
 struct TreeItem {
@@ -103,6 +107,14 @@ impl LicenseManager {
 
     /// Returns a vector of license strings
     pub fn get_licenses() -> Result<Vec<String>, Box<dyn std::error::Error>> {
+        // Check cache first
+        {
+            let cache_guard = LICENSE_CACHE.lock().unwrap();
+            if let Some(ref cached_licenses) = *cache_guard {
+                return Ok(cached_licenses.clone());
+            }
+        }
+
         let api_url = "https://api.github.com/repos/spdx/license-list-data/git/trees/main:text";
         let client = Client::new();
         let response = client
@@ -110,12 +122,19 @@ impl LicenseManager {
             .header("User-Agent", "curator-app")
             .send()?;
         let api_response: ApiResponse = response.json()?;
-        let files = api_response
+        let files: Vec<String> = api_response
             .tree
             .into_iter()
             .filter(|item| item.item_type == "blob")
             .map(|item| item.path)
             .collect();
+
+        // Cache the result
+        {
+            let mut cache_guard = LICENSE_CACHE.lock().unwrap();
+            *cache_guard = Some(files.clone());
+        }
+
         Ok(files)
     }
 
