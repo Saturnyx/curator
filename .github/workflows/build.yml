@@ -57,19 +57,28 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y gcc-aarch64-linux-gnu
 
+      - name: Install cross-compilation tools (macOS targets)
+        if: contains(matrix.target, 'apple')
+        run: |
+          echo "macOS targets should compile natively or with existing toolchain"
+
       - name: Build binary
         run: cargo build --release --target ${{ matrix.target }}
         env:
-          CC_aarch64_unknown_linux_gnu: aarch64-linux-gnu-gcc
-          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+          CC_aarch64_unknown_linux_gnu: ${{ matrix.target == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-gcc' || '' }}
+          CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.target == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-gcc' || '' }}
 
       - name: Prepare artifact
         shell: bash
         run: |
+          echo "Matrix OS: ${{ matrix.os }}"
+          echo "Matrix target: ${{ matrix.target }}"
+          echo "Matrix name: ${{ matrix.name }}"
+          ls -la target/${{ matrix.target }}/release/
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            cp target/${{ matrix.target }}/release/curator.exe ${{ matrix.name }}
+            cp target/${{ matrix.target }}/release/cu.exe ${{ matrix.name }}
           else
-            cp target/${{ matrix.target }}/release/curator ${{ matrix.name }}
+            cp target/${{ matrix.target }}/release/cu ${{ matrix.name }}
           fi
 
       - name: Upload artifact
