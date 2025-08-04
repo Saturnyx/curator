@@ -266,39 +266,8 @@ impl LicenseManager {
         Ok(files)
     }
 
-    /// Downloads License file to `LICENSE`
-    fn download_license(license: String) -> Result<(), Box<dyn std::error::Error>> {
-        let url = format!(
-            "https://raw.githubusercontent.com/spdx/license-list-data/main/text/{license}.txt"
-        );
-        let response = HTTP_CLIENT.get(&url).send()?;
-
-        if !response.status().is_success() {
-            return Err(format!(
-                "Failed to download license '{}': HTTP {} - {}",
-                license,
-                response.status().as_u16(),
-                response
-                    .status()
-                    .canonical_reason()
-                    .unwrap_or("Unknown error")
-            )
-            .into());
-        }
-
-        let mut response_text = response.text()?;
-        response_text = Self::modify_license(response_text);
-        let filename = "LICENSE".to_string();
-        std::fs::write(&filename, response_text)?;
-        println!(
-            "{}",
-            format!("Downloaded {license} license to {filename}").green()
-        );
-        Ok(())
-    }
-
     /// Modifies the license either by asking the user or by refering to config
-    fn modify_license(mut license: String) -> String {
+    pub fn modify_license(mut license: String) -> String {
         ConfigManager::load_config();
         let data_map = {
             let config_guard = CONFIGURATION.lock().unwrap();
@@ -383,5 +352,36 @@ impl LicenseManager {
 
         ConfigManager::save_config();
         license
+    }
+
+    /// Downloads License file to `LICENSE`
+    fn download_license(license: String) -> Result<(), Box<dyn std::error::Error>> {
+        let url = format!(
+            "https://raw.githubusercontent.com/spdx/license-list-data/main/text/{license}.txt"
+        );
+        let response = HTTP_CLIENT.get(&url).send()?;
+
+        if !response.status().is_success() {
+            return Err(format!(
+                "Failed to download license '{}': HTTP {} - {}",
+                license,
+                response.status().as_u16(),
+                response
+                    .status()
+                    .canonical_reason()
+                    .unwrap_or("Unknown error")
+            )
+            .into());
+        }
+
+        let mut response_text = response.text()?;
+        response_text = Self::modify_license(response_text);
+        let filename = "LICENSE".to_string();
+        std::fs::write(&filename, response_text)?;
+        println!(
+            "{}",
+            format!("Downloaded {license} license to {filename}").green()
+        );
+        Ok(())
     }
 }

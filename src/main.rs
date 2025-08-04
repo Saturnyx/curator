@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use curator::*;
+use curator::{conduct::ConductManager, *};
 
 #[derive(Parser)]
 #[command(name = "cu")]
@@ -17,6 +17,12 @@ enum Commands {
         #[command(subcommand)]
         action: LicenseAction,
     },
+    /// Set Code of Conduct
+    Conduct {
+        #[command(subcommand)]
+        action: ConductAction,
+    },
+
     /// Set project configuration
     Config {
         #[command(subcommand)]
@@ -45,6 +51,12 @@ enum LicenseAction {
 }
 
 #[derive(Subcommand, Clone)]
+enum ConductAction {
+    /// Set/download a Code of Conduct fot your project
+    Set,
+}
+
+#[derive(Subcommand, Clone)]
 enum ConfigAction {
     /// Set the configuration of the project
     Set,
@@ -70,6 +82,11 @@ fn main() {
             }
             LicenseAction::Preview { license_name } => {
                 LicenseManager::preview_license(license_name);
+            }
+        },
+        Commands::Conduct { action } => match action {
+            ConductAction::Set => {
+                ConductManager::set_conduct();
             }
         },
         Commands::Config { action } => match action {
