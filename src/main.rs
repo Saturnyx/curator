@@ -54,6 +54,9 @@ enum LicenseAction {
 enum ConductAction {
     /// Set/download a Code of Conduct fot your project
     Set,
+
+    /// Remove Code of Conduct
+    Remove,
 }
 
 #[derive(Subcommand, Clone)]
@@ -87,6 +90,9 @@ fn main() {
         Commands::Conduct { action } => match action {
             ConductAction::Set => {
                 ConductManager::set_conduct();
+            }
+            ConductAction::Remove => {
+                ConductManager::remove_conduct();
             }
         },
         Commands::Config { action } => match action {

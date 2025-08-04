@@ -81,6 +81,26 @@ impl ConductManager {
         ConfigManager::save_config();
     }
 
+    pub fn remove_conduct() {
+        if let Err(e) = std::fs::remove_file("CODE_OF_CONDUCT.md") {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                println!(
+                    "{} CODE_OF_CONDUCT.md file does not exist.",
+                    "[INFO]".yellow()
+                );
+            } else {
+                eprintln!(
+                    "{} Failed to remove CODE_OF_CONDUCT.md file: {}",
+                    "[ERROR]".red(),
+                    e
+                );
+                process::exit(1);
+            }
+        } else {
+            println!("{} CODE_OF_CONDUCT.md file removed.", "[SUCCESS]".green());
+        }
+    }
+
     /// Download the code of conduct
     fn download_conduct(conduct: String) -> Result<(), Box<dyn std::error::Error>> {
         let url = format!(
