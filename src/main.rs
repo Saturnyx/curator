@@ -57,6 +57,9 @@ enum ConductAction {
 
     /// Remove Code of Conduct
     Remove,
+
+    /// Preview a code of conduct
+    Preview,
 }
 
 #[derive(Subcommand, Clone)]
@@ -93,6 +96,9 @@ fn main() {
             }
             ConductAction::Remove => {
                 ConductManager::remove_conduct();
+            }
+            ConductAction::Preview => {
+                ConductManager::preview_conduct();
             }
         },
         Commands::Config { action } => match action {
