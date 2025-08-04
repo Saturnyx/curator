@@ -69,12 +69,14 @@ impl ConductManager {
         if conduct_name == "Citizen" {
             println!("NOTE: Every organization's governing policies should dictate how you handle warnings and expulsions of community members. It is strongly recommended that you mention those policies here or in Section 7 and that you include a mechanism for addressing grievances.");
         }
-        let mut config_guard = CONFIGURATION.lock().unwrap();
-        if let Some(data) = config_guard.get_mut("data") {
-            data.insert(
-                "license".to_string(),
-                conduct_name.to_lowercase().replace(" ", "-").clone(),
-            );
+        {
+            let mut config_guard = CONFIGURATION.lock().unwrap();
+            if let Some(data) = config_guard.get_mut("data") {
+                data.insert(
+                    "conduct".to_string(),
+                    conduct_name.to_lowercase().replace(" ", "-"),
+                );
+            }
         }
         ConfigManager::save_config();
     }
