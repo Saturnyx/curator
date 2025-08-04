@@ -90,7 +90,7 @@ Reload the license from your configuration (useful after updating project detail
 cu license reload
 ```
 
-### Configuration Management
+### Project Configuration Management
 
 #### View Current Configuration
 

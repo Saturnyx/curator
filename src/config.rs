@@ -40,7 +40,7 @@ impl ConfigManager {
             process::exit(1);
         }
     }
-    
+
     /// Checks if the config is correct
     pub fn check_config() -> bool {
         if !Path::new("curator.json").exists() {
@@ -137,6 +137,20 @@ impl ConfigManager {
             .starts_with('y');
         Self::gitignored(add_to_gitignore);
         Self::save_config();
+    }
+
+    /// Removes `curator.json`
+    pub fn remove_config() {
+        if let Err(e) = std::fs::remove_file("curator.json") {
+            if e.kind() == std::io::ErrorKind::NotFound {
+                println!("{} File does not exist.", "[INFO]".yellow());
+            } else {
+                eprintln!("{} Failed to remove file: {}", "[ERROR]".red(), e);
+                process::exit(1);
+            }
+        } else {
+            println!("{} File removed.", "[SUCCESS]".green());
+        }
     }
 
     /// Returns hashmap from `curator.json`

@@ -48,6 +48,8 @@ enum LicenseAction {
 enum ConfigAction {
     /// Set the configuration of the project
     Set,
+    /// Remove the configuration file
+    Remove,
 }
 
 fn main() {
@@ -73,6 +75,9 @@ fn main() {
         Commands::Config { action } => match action {
             ConfigAction::Set => {
                 ConfigManager::init_config();
+            }
+            ConfigAction::Remove => {
+                ConfigManager::remove_config();
             }
         },
     }
