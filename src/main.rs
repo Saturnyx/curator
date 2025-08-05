@@ -22,12 +22,12 @@ enum Commands {
         #[command(subcommand)]
         action: ConductAction,
     },
-
     /// Set project configuration
     Config {
         #[command(subcommand)]
         action: ConfigAction,
     },
+    Standards,
 }
 
 #[derive(Subcommand, Clone)]
@@ -54,10 +54,8 @@ enum LicenseAction {
 enum ConductAction {
     /// Set/download a Code of Conduct fot your project
     Set,
-
     /// Remove Code of Conduct
     Remove,
-
     /// Preview a code of conduct
     Preview,
 }
@@ -109,5 +107,6 @@ fn main() {
                 ConfigManager::remove_config();
             }
         },
+        Commands::Standards => Miscellaneous::standards(),
     }
 }

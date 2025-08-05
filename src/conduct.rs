@@ -149,7 +149,7 @@ impl ConductManager {
             );
             process::exit(1);
         } else {
-            println!("{} Loaded Code of Conduct", "SUCCESS".green());
+            println!("{} Loaded Code of Conduct", "[SUCCESS]".green());
         }
         let response_text = match response.text() {
             Ok(text) => text,
