@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use curator::{conduct::ConductManager, *};
+use curator_cli::{conduct::ConductManager, *};
 
 #[derive(Parser)]
 #[command(name = "cu")]
@@ -12,7 +12,7 @@ struct Cli {
 
 #[derive(Subcommand, Clone)]
 enum Commands {
-    /// Manage project licenses
+    /// Manage project licensesbr
     License {
         #[command(subcommand)]
         action: LicenseAction,

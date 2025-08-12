@@ -1,7 +1,16 @@
 [package]
-name = "curator"
+name = "curator_cli"
+description = "A Simple CLI to manage licenses and codes of conduct on your repo"
 version = "0.2.9"
 edition = "2021"
+license = "MIT"
+homepage = "https://github.com/Saturnyx/curator"
+repository = "https://github.com/Saturnyx/curator"
+readme = "README.md"
+authors = ["Harshal <saturnyx@disroot.org>"]
+keywords = ["repo", "management", "cli", "repository", "cu"]
+categories = ["command-line-utilities"]
+
 
 [[bin]]
 name = "cu"

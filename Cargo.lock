@@ -272,7 +272,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "curator"
+name = "curator_cli"
 version = "0.2.9"
 dependencies = [
  "chrono",

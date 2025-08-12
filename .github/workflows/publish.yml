@@ -1,0 +1,63 @@
+name: Publish to Crates.io
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty to use Cargo.toml version)'
+        required: false
+        default: ''
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    name: Publish to crates.io
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Rust
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Cache dependencies
+      uses: Swatinem/rust-cache@v2
+
+    - name: Verify project builds
+      run: cargo build --release
+
+    - name: Run tests
+      run: cargo test
+
+    - name: Check if version is already published
+      run: |
+        CRATE_VERSION=$(cargo metadata --format-version 1 | jq -r '.packages[] | select(.name == "curator_cli") | .version')
+        echo "Local version: $CRATE_VERSION"
+        
+        # Check if this version exists on crates.io
+        if curl -s "https://crates.io/api/v1/crates/curator_cli/versions" | jq -e ".versions[] | select(.num == \"$CRATE_VERSION\")" > /dev/null; then
+          echo "Version $CRATE_VERSION already exists on crates.io"
+          echo "SKIP_PUBLISH=true" >> $GITHUB_ENV
+        else
+          echo "Version $CRATE_VERSION not found on crates.io, proceeding with publish"
+          echo "SKIP_PUBLISH=false" >> $GITHUB_ENV
+        fi
+
+    - name: Publish to crates.io
+      if: env.SKIP_PUBLISH == 'false'
+      run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+    - name: Create GitHub Release (if triggered by workflow_dispatch)
+      if: github.event_name == 'workflow_dispatch' && env.SKIP_PUBLISH == 'false'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ env.CRATE_VERSION }}
+        release_name: Release v${{ env.CRATE_VERSION }}
+        draft: false
+        prerelease: false
