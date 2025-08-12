@@ -2,7 +2,6 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Rust](https://img.shields.io/badge/rust-1.70+-orange.svg)](https://www.rust-lang.org)
-[![Version](https://img.shields.io/badge/version-0.2.2-blue.svg)](Cargo.toml)
 
 A powerful command-line tool for managing project licenses and configuration with smart license detection and interactive setup.
 
@@ -30,7 +29,7 @@ The binary will be available at `target/release/curator` (or `curator.exe` on Wi
 ### Using Cargo
 
 ```bash
-cargo install --path .
+cargo install curator_cli
 ```
 
 ## 📖 Usage
