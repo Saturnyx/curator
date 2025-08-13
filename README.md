@@ -28,8 +28,18 @@ The binary will be available at `target/release/curator` (or `curator.exe` on Wi
 
 ### Using Cargo
 
+Method 1: Install directly from crates.io
+
 ```bash
 cargo install curator_cli
+```
+
+Method 2: Install from the repository
+
+```bash
+git clone https://github.com/Saturnyx/curator.git
+cd curator
+cargo install --path .
 ```
 
 ## 📖 Usage
@@ -155,7 +165,9 @@ Curator is built with a modular architecture:
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
+Contributions are welcome! Please feel free to submit a Pull Request. For major
+changes, please open an issue first to discuss what you would like to change.
+For more information, please check the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ### Development Setup
 
