@@ -137,6 +137,7 @@ impl ConfigManager {
             .starts_with('y');
         Self::gitignored(add_to_gitignore);
         Self::save_config();
+        LicenseManager::reload_license();
     }
 
     /// Removes `curator.json`
