@@ -1,7 +1,7 @@
 [package]
 name = "curator_cli"
 description = "A Simple CLI to manage licenses and codes of conduct on your repo"
-version = "0.3.2"
+version = "0.3.3"
 edition = "2021"
 license = "MIT"
 homepage = "https://github.com/Saturnyx/curator"
