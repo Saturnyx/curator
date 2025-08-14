@@ -1,6 +1,8 @@
 use crossterm::style::Stylize;
 use git2::Repository;
+use std::fs;
 use std::io::{self, Write};
+use std::path::Path;
 
 pub struct ProjectManager;
 
@@ -31,13 +33,61 @@ impl ProjectManager {
             if input.trim().to_lowercase() != "y" {
                 std::process::exit(1);
             }
-            std::process::exit(1);
         }
-        let repo_url: String = format!("https://github.com/Saturnyx/curator/tree/main/templates/project{project_template}");
+        // Clone the entire repository first, then copy the specific template
+        let repo_url = "https://github.com/Saturnyx/curator.git";
+        let temp_dir = std::env::temp_dir().join("curator_temp");
 
-        match Repository::clone(&repo_url, local_path.clone()) {
-            Ok(_) => println!("{} Repository cloned successfully.", "[SUCCESS]".green()),
+        // Clean up any existing temp directory
+        if temp_dir.exists() {
+            std::fs::remove_dir_all(&temp_dir).ok();
+        }
+
+        match Repository::clone(&repo_url, &temp_dir) {
+            Ok(_) => {
+                println!("{} Repository cloned successfully.", "[SUCCESS]".green());
+
+                // Copy the specific template to the current directory
+                let template_path = temp_dir
+                    .join("templates")
+                    .join("project")
+                    .join(&project_template);
+
+                if template_path.exists() {
+                    match Self::copy_dir(&template_path, Path::new(&local_path)) {
+                        Ok(_) => println!("{} Template copied successfully.", "[SUCCESS]".green()),
+                        Err(e) => eprintln!("{} Failed to copy template: {}", "[ERROR]".red(), e),
+                    }
+                } else {
+                    eprintln!(
+                        "{} Template '{}' not found in repository.",
+                        "[ERROR]".red(),
+                        project_template
+                    );
+                }
+
+                // Clean up temp directory
+                std::fs::remove_dir_all(&temp_dir).ok();
+            }
             Err(e) => eprintln!("{} Failed to clone repository: {}", "[ERROR]".red(), e),
         }
+    }
+    fn copy_dir(src: &Path, dst: &Path) -> io::Result<()> {
+        if !dst.exists() {
+            fs::create_dir_all(dst)?;
+        }
+
+        for entry in fs::read_dir(src)? {
+            let entry = entry?;
+            let src_path = entry.path();
+            let dst_path = dst.join(entry.file_name());
+
+            if src_path.is_dir() {
+                Self::copy_dir(&src_path, &dst_path)?;
+            } else {
+                fs::copy(&src_path, &dst_path)?;
+            }
+        }
+        Ok(())
     }
 }
