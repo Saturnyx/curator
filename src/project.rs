@@ -20,7 +20,7 @@ impl ProjectManager {
                 std::process::exit(1);
             }
         };
-        
+
         if std::fs::read_dir(&local_path)
             .map(|mut i| i.next().is_some())
             .unwrap_or(false)
@@ -34,7 +34,7 @@ impl ProjectManager {
                 std::process::exit(1);
             }
         }
-        
+
         // Download repository as zip file instead of cloning
         let zip_url = "https://github.com/Saturnyx/curator/archive/refs/heads/main.zip";
         let temp_dir = std::env::temp_dir().join("curator_temp");
@@ -46,11 +46,14 @@ impl ProjectManager {
 
         match Self::download_and_extract_zip(zip_url, &temp_dir) {
             Ok(_) => {
-                println!("{} Repository downloaded successfully.", "[SUCCESS]".green());
+                println!(
+                    "{} Repository downloaded successfully.",
+                    "[SUCCESS]".green()
+                );
 
                 // Copy the specific template to the current directory
                 let template_path = temp_dir
-                    .join("curator-main")  // GitHub zip extracts with repo-branch format
+                    .join("curator-main") // GitHub zip extracts with repo-branch format
                     .join("templates")
                     .join("project")
                     .join(&project_template);
@@ -75,7 +78,10 @@ impl ProjectManager {
         }
     }
 
-    fn download_and_extract_zip(url: &str, extract_to: &Path) -> Result<(), Box<dyn std::error::Error>> {
+    fn download_and_extract_zip(
+        url: &str,
+        extract_to: &Path,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         // Download the zip file
         let response = reqwest::blocking::get(url)?;
         let bytes = response.bytes()?;
