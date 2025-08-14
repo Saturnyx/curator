@@ -24,7 +24,7 @@ serde_json = "1.0"
 dialoguer = "0.11"
 fuzzy-matcher = "0.3"
 slab = "0.4.11"
-zip = "2.1"
+zip = { version = "2.1", default-features = false, features = ["deflate"] }
 chrono = { version = "0.4", features = ["clock"], default-features = false }
 reqwest = { version = "0.12", features = [
     "json",
