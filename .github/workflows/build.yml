@@ -67,13 +67,13 @@ jobs:
         if: matrix.target == 'aarch64-unknown-linux-gnu'
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-aarch64-linux-gnu perl make
+          sudo apt-get install -y gcc-aarch64-linux-gnu
 
       - name: Install cross-compilation tools (musl targets)
         if: contains(matrix.target, 'musl')
         run: |
           sudo apt-get update
-          sudo apt-get install -y musl-tools perl make
+          sudo apt-get install -y musl-tools
           if [[ "${{ matrix.target }}" == "aarch64-unknown-linux-musl" ]]; then
             sudo apt-get install -y gcc-aarch64-linux-gnu
           fi

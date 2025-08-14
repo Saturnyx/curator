@@ -1,5 +1,4 @@
 use crossterm::style::Stylize;
-use git2::Repository;
 use std::fs;
 use std::io::{self, Write};
 use std::path::Path;
@@ -21,6 +20,7 @@ impl ProjectManager {
                 std::process::exit(1);
             }
         };
+        
         if std::fs::read_dir(&local_path)
             .map(|mut i| i.next().is_some())
             .unwrap_or(false)
@@ -34,8 +34,9 @@ impl ProjectManager {
                 std::process::exit(1);
             }
         }
-        // Clone the entire repository first, then copy the specific template
-        let repo_url = "https://github.com/Saturnyx/curator.git";
+        
+        // Download repository as zip file instead of cloning
+        let zip_url = "https://github.com/Saturnyx/curator/archive/refs/heads/main.zip";
         let temp_dir = std::env::temp_dir().join("curator_temp");
 
         // Clean up any existing temp directory
@@ -43,12 +44,13 @@ impl ProjectManager {
             std::fs::remove_dir_all(&temp_dir).ok();
         }
 
-        match Repository::clone(repo_url, &temp_dir) {
+        match Self::download_and_extract_zip(zip_url, &temp_dir) {
             Ok(_) => {
-                println!("{} Repository cloned successfully.", "[SUCCESS]".green());
+                println!("{} Repository downloaded successfully.", "[SUCCESS]".green());
 
                 // Copy the specific template to the current directory
                 let template_path = temp_dir
+                    .join("curator-main")  // GitHub zip extracts with repo-branch format
                     .join("templates")
                     .join("project")
                     .join(&project_template);
@@ -69,9 +71,45 @@ impl ProjectManager {
                 // Clean up temp directory
                 std::fs::remove_dir_all(&temp_dir).ok();
             }
-            Err(e) => eprintln!("{} Failed to clone repository: {}", "[ERROR]".red(), e),
+            Err(e) => eprintln!("{} Failed to download repository: {}", "[ERROR]".red(), e),
         }
     }
+
+    fn download_and_extract_zip(url: &str, extract_to: &Path) -> Result<(), Box<dyn std::error::Error>> {
+        // Download the zip file
+        let response = reqwest::blocking::get(url)?;
+        let bytes = response.bytes()?;
+
+        // Create temp directory
+        std::fs::create_dir_all(extract_to)?;
+
+        // Extract the zip file
+        let cursor = std::io::Cursor::new(bytes);
+        let mut archive = zip::ZipArchive::new(cursor)?;
+
+        for i in 0..archive.len() {
+            let mut file = archive.by_index(i)?;
+            let outpath = match file.enclosed_name() {
+                Some(path) => extract_to.join(path),
+                None => continue,
+            };
+
+            if file.name().ends_with('/') {
+                std::fs::create_dir_all(&outpath)?;
+            } else {
+                if let Some(p) = outpath.parent() {
+                    if !p.exists() {
+                        std::fs::create_dir_all(p)?;
+                    }
+                }
+                let mut outfile = std::fs::File::create(&outpath)?;
+                std::io::copy(&mut file, &mut outfile)?;
+            }
+        }
+
+        Ok(())
+    }
+
     fn copy_dir(src: &Path, dst: &Path) -> io::Result<()> {
         if !dst.exists() {
             fs::create_dir_all(dst)?;
