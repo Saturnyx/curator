@@ -126,7 +126,7 @@ impl ConductManager {
         };
         let conduct_formatted = conduct.to_lowercase().replace(" ", "-");
         let url = format!(
-            "https://raw.githubusercontent.com/Saturnyx/curator/refs/heads/main/templates/{conduct_formatted}.md"
+            "https://raw.githubusercontent.com/Saturnyx/curator/refs/heads/main/templates/conduct/{conduct_formatted}.md"
         );
 
         let response = match HTTP_CLIENT.get(&url).send() {
@@ -166,7 +166,7 @@ impl ConductManager {
     /// Download the code of conduct
     fn download_conduct(conduct: String) -> Result<(), Box<dyn std::error::Error>> {
         let url = format!(
-            "https://raw.githubusercontent.com/Saturnyx/curator/refs/heads/main/templates/{conduct}.md"
+            "https://raw.githubusercontent.com/Saturnyx/curator/refs/heads/main/templates/conduct/{conduct}.md"
         );
         let response = HTTP_CLIENT.get(&url).send()?;
 

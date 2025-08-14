@@ -27,6 +27,12 @@ enum Commands {
         #[command(subcommand)]
         action: ConfigAction,
     },
+    /// Handling Project Outline
+    Project {
+        #[command(subcommand)]
+        action: ProjectAction,
+    },
+    /// Shows the Community Standards of the project
     Standards,
 }
 
@@ -68,6 +74,12 @@ enum ConfigAction {
     Remove,
 }
 
+#[derive(Subcommand, Clone)]
+enum ProjectAction {
+    /// Initializes the project
+    Init { project_type: String },
+}
+
 fn main() {
     let args = Cli::parse();
     match args.command {
@@ -105,6 +117,11 @@ fn main() {
             }
             ConfigAction::Remove => {
                 ConfigManager::remove_config();
+            }
+        },
+        Commands::Project { action } => match action {
+            ProjectAction::Init { project_type } => {
+                ProjectManager::init(project_type);
             }
         },
         Commands::Standards => Miscellaneous::standards(),
