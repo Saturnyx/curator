@@ -113,9 +113,83 @@ jobs:
           path: ${{ matrix.name }}
           retention-days: 7
 
+  package:
+    name: Build Linux Packages
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download Linux AMD64 binary
+        uses: actions/download-artifact@v4
+        with:
+          name: curator-linux-amd64
+          path: ./artifacts/
+
+      - name: Install packaging tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm ruby ruby-dev rubygems build-essential
+          sudo gem install --no-document fpm
+
+      - name: Get version from tag
+        id: get_version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Prepare binary
+        run: |
+          chmod +x ./artifacts/curator-linux-amd64
+          mkdir -p ./package/usr/local/bin
+          cp ./artifacts/curator-linux-amd64 ./package/usr/local/bin/curator
+
+      - name: Create .deb package
+        run: |
+          fpm -s dir -t deb \
+            -n curator \
+            -v ${{ steps.get_version.outputs.VERSION }} \
+            --description "A versatile CLI tool for project management and automation" \
+            --url "https://github.com/Saturnyx/curator" \
+            --maintainer "Saturnyx <your-email@example.com>" \
+            --license "MIT" \
+            --architecture amd64 \
+            -C ./package \
+            usr/local/bin/curator=/usr/local/bin/curator
+
+      - name: Create .rpm package
+        run: |
+          fpm -s dir -t rpm \
+            -n curator \
+            -v ${{ steps.get_version.outputs.VERSION }} \
+            --description "A versatile CLI tool for project management and automation" \
+            --url "https://github.com/Saturnyx/curator" \
+            --maintainer "Saturnyx <your-email@example.com>" \
+            --license "MIT" \
+            --architecture x86_64 \
+            -C ./package \
+            usr/local/bin/curator=/usr/local/bin/curator
+
+      - name: Upload .deb package
+        uses: actions/upload-artifact@v4
+        with:
+          name: curator-deb-package
+          path: "*.deb"
+          retention-days: 7
+
+      - name: Upload .rpm package
+        uses: actions/upload-artifact@v4
+        with:
+          name: curator-rpm-package
+          path: "*.rpm"
+          retention-days: 7
+
   release:
     name: Create Release
-    needs: build
+    needs: [build, package]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -134,13 +208,32 @@ jobs:
             curator-windows-arm64.exe/curator-windows-arm64.exe
             curator-macos-amd64/curator-macos-amd64
             curator-macos-arm64/curator-macos-arm64
+            curator-deb-package/*.deb
+            curator-rpm-package/*.rpm
           body: |
-            ## Cargo Installation:
+            ## Installation Options:
+            
+            ### Via Package Manager:
+            **Debian/Ubuntu (.deb)**:
+            ```bash
+            wget https://github.com/Saturnyx/curator/releases/download/${{ github.ref_name }}/curator_${{ github.ref_name }}_amd64.deb
+            sudo dpkg -i curator_${{ github.ref_name }}_amd64.deb
+            ```
+            
+            **RHEL/CentOS/Fedora (.rpm)**:
+            ```bash
+            wget https://github.com/Saturnyx/curator/releases/download/${{ github.ref_name }}/curator-${{ github.ref_name }}-1.x86_64.rpm
+            sudo rpm -i curator-${{ github.ref_name }}-1.x86_64.rpm
+            ```
+            
+            ### Via Cargo:
             ```bash
             cargo install curator_cli
             ```
-            ## Installation using files:
+            
+            ### Manual Installation:
             Download the appropriate binary for your platform and add it to your PATH.
+            
             **Linux (x86_64 architecture)**: curator-linux-amd64
             **Linux (ARM64 architecture)**: curator-linux-arm64
             **Linux (x86_64 architecture, static)**: curator-linux-amd64-static
