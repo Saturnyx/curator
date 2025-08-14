@@ -87,18 +87,11 @@ jobs:
         run: cargo build --release --target ${{ matrix.target }}
         env:
           CARGO_NET_GIT_FETCH_WITH_CLI: true
-          # Force vendored OpenSSL and static linking for cross-compilation
-          OPENSSL_STATIC: 1
-          OPENSSL_VENDOR: 1
-          # Additional environment variables for libgit2
-          LIBGIT2_NO_VENDOR: 0
           # Cross-compilation setup for aarch64 targets
           CC_aarch64_unknown_linux_gnu: ${{ matrix.target == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-gcc' || '' }}
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: ${{ matrix.target == 'aarch64-unknown-linux-gnu' && 'aarch64-linux-gnu-gcc' || '' }}
           CC_aarch64_unknown_linux_musl: ${{ matrix.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-gnu-gcc' || '' }}
           CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: ${{ matrix.target == 'aarch64-unknown-linux-musl' && 'aarch64-linux-gnu-gcc' || '' }}
-          # Ensure pkg-config works for cross-compilation if needed
-          PKG_CONFIG_ALLOW_CROSS: ${{ contains(matrix.target, 'aarch64') && '1' || '' }}
 
       - name: Prepare artifact
         shell: bash
