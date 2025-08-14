@@ -5,8 +5,6 @@
 #include <string>
 
 // Function declarations
-void printWelcome();
-int add(int a, int b);
-std::string getMessage();
+void main();
 
 #endif // MAIN_H

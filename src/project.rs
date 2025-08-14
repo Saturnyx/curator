@@ -43,7 +43,7 @@ impl ProjectManager {
             std::fs::remove_dir_all(&temp_dir).ok();
         }
 
-        match Repository::clone(&repo_url, &temp_dir) {
+        match Repository::clone(repo_url, &temp_dir) {
             Ok(_) => {
                 println!("{} Repository cloned successfully.", "[SUCCESS]".green());
 
