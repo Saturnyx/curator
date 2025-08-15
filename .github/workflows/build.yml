@@ -114,18 +114,30 @@ jobs:
           retention-days: 7
 
   package:
-    name: Build Linux Packages
+    name: Build Linux Packages ${{ matrix.arch }}
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            artifact_name: curator-linux-amd64
+            deb_arch: amd64
+            rpm_arch: x86_64
+          - arch: arm64
+            artifact_name: curator-linux-arm64
+            deb_arch: arm64
+            rpm_arch: aarch64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Download Linux AMD64 binary
+      - name: Download Linux ${{ matrix.arch }} binary
         uses: actions/download-artifact@v4
         with:
-          name: curator-linux-amd64
+          name: ${{ matrix.artifact_name }}
           path: ./artifacts/
 
       - name: Install packaging tools
@@ -143,9 +155,9 @@ jobs:
 
       - name: Prepare binary
         run: |
-          chmod +x ./artifacts/curator-linux-amd64
+          chmod +x ./artifacts/${{ matrix.artifact_name }}
           mkdir -p ./package/usr/local/bin
-          cp ./artifacts/curator-linux-amd64 ./package/usr/local/bin/curator
+          cp ./artifacts/${{ matrix.artifact_name }} ./package/usr/local/bin/curator
 
       - name: Create .deb package
         run: |
@@ -156,7 +168,7 @@ jobs:
             --url "https://github.com/Saturnyx/curator" \
             --maintainer "Saturnyx <your-email@example.com>" \
             --license "MIT" \
-            --architecture amd64 \
+            --architecture ${{ matrix.deb_arch }} \
             -C ./package \
             usr/local/bin/curator=/usr/local/bin/curator
 
@@ -169,21 +181,21 @@ jobs:
             --url "https://github.com/Saturnyx/curator" \
             --maintainer "Saturnyx <your-email@example.com>" \
             --license "MIT" \
-            --architecture x86_64 \
+            --architecture ${{ matrix.rpm_arch }} \
             -C ./package \
             usr/local/bin/curator=/usr/local/bin/curator
 
       - name: Upload .deb package
         uses: actions/upload-artifact@v4
         with:
-          name: curator-deb-package
+          name: curator-deb-package-${{ matrix.arch }}
           path: "*.deb"
           retention-days: 7
 
       - name: Upload .rpm package
         uses: actions/upload-artifact@v4
         with:
-          name: curator-rpm-package
+          name: curator-rpm-package-${{ matrix.arch }}
           path: "*.rpm"
           retention-days: 7
 
@@ -208,22 +220,34 @@ jobs:
             curator-windows-arm64.exe/curator-windows-arm64.exe
             curator-macos-amd64/curator-macos-amd64
             curator-macos-arm64/curator-macos-arm64
-            curator-deb-package/*.deb
-            curator-rpm-package/*.rpm
+            curator-deb-package-amd64/*.deb
+            curator-deb-package-arm64/*.deb
+            curator-rpm-package-amd64/*.rpm
+            curator-rpm-package-arm64/*.rpm
           body: |
             ## Installation Options:
             
             ### Via Package Manager:
             **Debian/Ubuntu (.deb)**:
             ```bash
+            # AMD64/x86_64
             wget https://github.com/Saturnyx/curator/releases/download/${{ github.ref_name }}/curator_${{ github.ref_name }}_amd64.deb
             sudo dpkg -i curator_${{ github.ref_name }}_amd64.deb
+            
+            # ARM64/aarch64
+            wget https://github.com/Saturnyx/curator/releases/download/${{ github.ref_name }}/curator_${{ github.ref_name }}_arm64.deb
+            sudo dpkg -i curator_${{ github.ref_name }}_arm64.deb
             ```
             
             **RHEL/CentOS/Fedora (.rpm)**:
             ```bash
+            # AMD64/x86_64
             wget https://github.com/Saturnyx/curator/releases/download/${{ github.ref_name }}/curator-${{ github.ref_name }}-1.x86_64.rpm
             sudo rpm -i curator-${{ github.ref_name }}-1.x86_64.rpm
+            
+            # ARM64/aarch64
+            wget https://github.com/Saturnyx/curator/releases/download/${{ github.ref_name }}/curator-${{ github.ref_name }}-1.aarch64.rpm
+            sudo rpm -i curator-${{ github.ref_name }}-1.aarch64.rpm
             ```
             
             ### Via Cargo:
