@@ -1,4 +1,4 @@
-name: curator
+name: curator-cli
 base: core22
 version: git
 summary: A versatile CLI tool for project management and automation

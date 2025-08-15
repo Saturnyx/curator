@@ -230,7 +230,7 @@ jobs:
             
             ### Via Snap (Recommended for Linux):
             ```bash
-            sudo snap install curator
+            sudo snap install curator-cli
             ```
             
             ### Via Package Manager:
