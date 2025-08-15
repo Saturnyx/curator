@@ -296,14 +296,6 @@ jobs:
           path: ${{ steps.build.outputs.snap }}
           retention-days: 7
 
-      - name: Publish to Snap Store (edge)
-        uses: snapcore/action-publish@v1
-        env:
-          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
-        with:
-          snap: ${{ steps.build.outputs.snap }}
-          release: edge
-
       - name: Publish to Snap Store (stable)
         uses: snapcore/action-publish@v1
         env:
