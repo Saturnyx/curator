@@ -35,11 +35,9 @@ impl ProjectManager {
             }
         }
 
-        // Download repository as zip file instead of cloning
-        let zip_url = "https://github.com/Saturnyx/curator/archive/refs/heads/main.zip";
+        let zip_url = "https://github.com/Saturnyx/project-templates/archive/refs/heads/main.zip";
         let temp_dir = std::env::temp_dir().join("curator_temp");
 
-        // Clean up any existing temp directory
         if temp_dir.exists() {
             std::fs::remove_dir_all(&temp_dir).ok();
         }
@@ -51,11 +49,8 @@ impl ProjectManager {
                     "[SUCCESS]".green()
                 );
 
-                // Copy the specific template to the current directory
                 let template_path = temp_dir
-                    .join("curator-main") // GitHub zip extracts with repo-branch format
-                    .join("templates")
-                    .join("project")
+                    .join("project-templates-main")
                     .join(&project_template);
 
                 if template_path.exists() {
@@ -82,14 +77,11 @@ impl ProjectManager {
         url: &str,
         extract_to: &Path,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        // Download the zip file
         let response = reqwest::blocking::get(url)?;
         let bytes = response.bytes()?;
 
-        // Create temp directory
         std::fs::create_dir_all(extract_to)?;
 
-        // Extract the zip file
         let cursor = std::io::Cursor::new(bytes);
         let mut archive = zip::ZipArchive::new(cursor)?;
 

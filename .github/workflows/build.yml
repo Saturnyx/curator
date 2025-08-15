@@ -201,7 +201,7 @@ jobs:
 
   release:
     name: Create Release
-    needs: [build, package]
+    needs: [build, package, snap]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     steps:
@@ -224,8 +224,14 @@ jobs:
             curator-deb-package-arm64/*.deb
             curator-rpm-package-amd64/*.rpm
             curator-rpm-package-arm64/*.rpm
+            curator-snap/*.snap
           body: |
             ## Installation Options:
+            
+            ### Via Snap (Recommended for Linux):
+            ```bash
+            sudo snap install curator
+            ```
             
             ### Via Package Manager:
             **Debian/Ubuntu (.deb)**:
@@ -270,6 +276,41 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  snap:
+    name: Build and Publish Snap
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build snap
+        uses: snapcore/action-build@v1
+        id: build
+
+      - name: Upload snap artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: curator-snap
+          path: ${{ steps.build.outputs.snap }}
+          retention-days: 7
+
+      - name: Publish to Snap Store (edge)
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: edge
+
+      - name: Publish to Snap Store (stable)
+        uses: snapcore/action-publish@v1
+        env:
+          SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
+        with:
+          snap: ${{ steps.build.outputs.snap }}
+          release: stable
 
   publish:
     name: Publish to crates.io

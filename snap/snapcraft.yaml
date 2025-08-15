@@ -1,0 +1,44 @@
+name: curator
+base: core22
+version: git
+summary: A versatile CLI tool for project management and automation
+description: |
+  Curator is a powerful command-line interface tool designed to streamline 
+  project management and automation tasks. It provides utilities for project 
+  initialization, license management, code of conduct setup, and various 
+  development workflow automation features.
+
+grade: stable
+confinement: strict
+
+architectures:
+  - build-on: amd64
+  - build-on: arm64
+
+apps:
+  curator:
+    command: bin/curator
+    plugs:
+      - home
+      - network
+      - network-bind
+      - removable-media
+
+parts:
+  curator:
+    plugin: rust
+    source: .
+    build-packages:
+      - git
+      - pkg-config
+      - libssl-dev
+      - build-essential
+    stage-packages:
+      - ca-certificates
+    rust-features:
+      - default
+    override-build: |
+      rustup default stable
+      cargo build --release
+      mkdir -p $SNAPCRAFT_PART_INSTALL/bin
+      cp target/release/cu $SNAPCRAFT_PART_INSTALL/bin/curator
