@@ -1,7 +1,7 @@
 name: curator-cli
 base: core22
 version: git
-summary: A versatile CLI tool for project management and automation
+summary: A versatile CLI tool for project management
 description: |
   Curator is a powerful command-line interface tool designed to streamline 
   project management and automation tasks. It provides utilities for project 
@@ -10,6 +10,9 @@ description: |
 
 grade: stable
 confinement: strict
+
+aliases:
+  - cu
 
 architectures:
   - build-on: amd64

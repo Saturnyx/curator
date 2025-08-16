@@ -1,6 +1,6 @@
 [package]
 name = "curator_cli"
-description = "A Simple CLI to manage licenses and codes of conduct on your repo"
+description = "A versatile CLI tool for project management"
 version = "0.3.4"
 edition = "2021"
 license = "MIT"
