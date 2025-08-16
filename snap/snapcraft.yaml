@@ -40,13 +40,6 @@ parts:
     rust-features:
       - default
     override-build: |
-      # Extract version from Cargo.toml
-      CARGO_VERSION=$(grep "^version = " Cargo.toml | cut -d'"' -f2)
-      echo "Using version from Cargo.toml: $CARGO_VERSION"
-      
-      # Set the version for this build
-      snapcraftctl set-version "$CARGO_VERSION"
-      
       rustup default stable
       cargo build --release
       mkdir -p $SNAPCRAFT_PART_INSTALL/bin
