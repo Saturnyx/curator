@@ -1,7 +1,7 @@
 [package]
 name = "curator_cli"
 description = "A versatile CLI tool for project management"
-version = "0.3.4"
+version = "0.3.5"
 edition = "2021"
 license = "MIT"
 homepage = "https://github.com/Saturnyx/curator"
