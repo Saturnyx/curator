@@ -44,6 +44,15 @@ cd curator
 cargo install --path .
 ```
 
+### Snap Package
+
+Curator is available as a Snap package for easy installation on Linux:
+
+```bash
+sudo snap install curator-cli
+sudo snap alias curator-cli.curator cu
+```
+
 ## 📖 Usage
 
 Curator uses the command alias `cu` for convenience.
