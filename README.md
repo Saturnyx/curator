@@ -5,6 +5,8 @@
 
 A powerful command-line tool for managing project licenses and configuration with smart license detection and interactive setup.
 
+[![Get it from the Snap Store](https://snapcraft.io/en/dark/install.svg)](https://snapcraft.io/curator-cli)
+
 ## ✨ Features
 
 - 🔍 **Smart License Management**: Automatically fetch and download licenses from the SPDX License List
