@@ -11,9 +11,6 @@ description: |
 grade: stable
 confinement: strict
 
-aliases:
-  - cu
-
 architectures:
   - build-on: amd64
   - build-on: arm64
@@ -21,6 +18,8 @@ architectures:
 apps:
   curator:
     command: bin/curator
+    aliases:
+      - cu
     plugs:
       - home
       - network
