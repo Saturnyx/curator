@@ -231,6 +231,7 @@ jobs:
             ### Via Snap (Recommended for Linux):
             ```bash
             sudo snap install curator-cli
+            sudo snap alias curator-cli.curator cu
             ```
             
             ### Via Package Manager:
