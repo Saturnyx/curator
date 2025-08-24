@@ -37,5 +37,13 @@ clap = { version = "4.0", features = ["derive"] }
 [profile.release]
 codegen-units = 1
 lto = "fat"
-opt-level = "z"
+opt-level = 3
+panic = "abort"
 strip = "debuginfo"
+target-cpu = "native"
+
+[profile.dev]
+debug = true
+codegen-units = 12
+incremental = true
+opt-level = 0
