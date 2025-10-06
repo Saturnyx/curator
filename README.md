@@ -14,7 +14,7 @@ A powerful command-line tool for managing project licenses and configuration wit
 - ⚙️ **Project Configuration**: Interactive project setup with persistent configuration
 - 🔄 **License Reloading**: Easily update or reload existing licenses
 - 📝 **Template Processing**: Automatic placeholder replacement in license templates
-- 🗂️ **Git Integration**: Optional .gitignore management for configuration files
+- 🗂︎ **Git Integration**: Optional .gitignore management for configuration files
 
 ## 🚀 Installation
 
@@ -139,7 +139,7 @@ To update your project configuration:
 cu config set
 ```
 
-## 🛠️ How It Works
+## 🛠︎ How It Works
 
 ### License Processing
 
@@ -154,7 +154,7 @@ cu config set
 - **Persistent Storage**: Saves project metadata for consistent license generation
 - **Git Integration**: Optionally manages `.gitignore` entries for configuration files
 
-## 🏗️ Architecture
+## 🏗︎ Architecture
 
 Curator is built with a modular architecture:
 
